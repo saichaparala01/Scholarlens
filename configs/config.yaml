@@ -1,0 +1,42 @@
+# ScholarLens configuration. Every team member reads from this file so that
+# experiments stay comparable. Change values here, not inside the scripts.
+
+seed: 42
+
+summarization:
+  dataset: "ccdv/arxiv-summarization"   # long scientific papers + abstracts
+  train_samples: 20000                  # subsample so it fits free Colab GPUs
+  val_samples: 1000
+  test_samples: 1000
+  max_input_tokens: 1024
+  max_target_tokens: 256
+  models:
+    - "facebook/bart-base"
+    - "t5-small"
+
+qa:
+  dataset: "squad_v2"                   # ~130k training questions
+  train_samples: 40000
+  val_samples: 3000
+  max_seq_len: 384
+  doc_stride: 128
+  models:
+    - "distilbert-base-uncased"
+    - "roberta-base"
+  retriever: "sentence-transformers/all-MiniLM-L6-v2"
+  top_k_passages: 3
+
+ner:
+  dataset: "allenai/scierc"             # scientific entities (Task, Method, Metric, ...)
+  fallback_dataset: "conll2003"         # use this if SciERC is unavailable
+  max_seq_len: 256
+  models:
+    - "allenai/scibert_scivocab_uncased"
+    - "bert-base-uncased"
+
+training:
+  learning_rate: 5.0e-5
+  batch_size: 8
+  epochs: 3
+  weight_decay: 0.01
+  warmup_ratio: 0.06
