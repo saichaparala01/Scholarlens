@@ -9,3 +9,4 @@ checkpoints/
 *.bin
 *.safetensors
 .DS_Store
+.pytest_cache/

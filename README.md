@@ -1,61 +1,80 @@
 # ScholarLens: An NLP Assistant for Research Papers
 
 ## Team
-## Team
 | Name | Student ID | Module |
 |------|-----------|--------|
-| Sajitha Konda | 70082694 | Data preprocessing + Summarization (BART vs T5) + Architecture diagrams |
-| Mounika Sai Chowdary Chaparala| 700778259 | Semantic retrieval + Question Answering (DistilBERT vs RoBERTa) + Gradio demo app |
-| Babithji Repalle | TODO | Named Entity Recognition (SciBERT vs BERT) + Evaluation and comparison tables + Repo and README |
+| Member 1 | TODO | Data preprocessing + Summarization (BART vs T5) + Architecture diagrams |
+| Member 2 | TODO | Semantic retrieval + Question Answering (DistilBERT vs RoBERTa) + Demo app |
+| Member 3 | TODO | Named Entity Recognition (SciBERT vs BERT) + Evaluation + Repo |
 
-Course: CS5760 | Instructor: Tsai, Ihua | Semester: Fall 2026
+Course: TODO | Instructor: TODO | Semester: TODO
 
 ## Introduction
-ScholarLens is a multi-task NLP pipeline that helps readers digest scientific papers.
+ScholarLens is a multi-task NLP system that helps readers digest scientific papers.
 Given a paper, it (1) generates an abstract-style summary, (2) extracts key scientific
-entities such as methods, datasets, tasks and metrics, and (3) answers natural-language
-questions about the paper using semantic retrieval followed by extractive QA.
+entities such as methods, tasks and datasets, and (3) answers natural-language questions
+about the paper using semantic retrieval followed by extractive question answering.
 
-Each module fine-tunes at least two transformer variants so we can compare them with
-multiple metrics (ROUGE, BERTScore, F1, Exact Match, entity-level precision/recall/F1).
+Each task fine-tunes two transformer variants so they can be compared with multiple
+metrics: ROUGE-1/2/L and BERTScore (summarization), Exact Match and F1 (QA), and
+entity-level precision, recall and F1 (NER). Everything uses free tools: Hugging Face
+Transformers, PyTorch, Google Colab, FastAPI and plain HTML.
 
 ## Pipeline
 ```
-Paper text -> cleaning -> section/sentence split
-                 |-> Summarization (BART vs T5)        -> summary
-                 |-> NER (SciBERT vs BERT-base)        -> entities
-                 |-> Retrieval (sentence-transformers) -> passages
-                          -> QA (DistilBERT vs RoBERTa) -> answer
+Paper text -> cleaning -> sentence / passage split
+                 |-> Summarization (BART vs T5)          -> summary
+                 |-> NER (SciBERT vs BERT)               -> entities
+                 |-> Retrieval (sentence-transformers)   -> top passages
+                          -> QA (DistilBERT vs RoBERTa)  -> answer + evidence
 ```
 
 ## Repository layout
+See [docs/SETUP.md](docs/SETUP.md) for the full layout and step-by-step instructions.
+
 ```
-scholarlens/
-  configs/config.yaml        # model names, dataset sizes, hyperparameters
-  src/
-    preprocessing.py         # shared text cleaning and sentence splitting
-    data_loading.py          # dataset loaders for all three tasks
-    summarization/           # Member 1
-    qa/                      # Member 2
-    ner/                     # Member 3
-    evaluation/              # metrics scripts
-  app/                       # Gradio demo (Member 4)
-  notebooks/                 # Colab training notebooks
-  results/                   # metrics tables, plots (generated)
-  docs/                      # architecture diagrams, report
+configs/config.yaml     models, dataset sizes, hyperparameters (edit here, not in scripts)
+src/                    preprocessing, data loading, training + evaluation per task, pipeline
+backend/main.py         FastAPI server (REST API)
+frontend/index.html     web interface
+app/gradio_demo.py      optional Gradio demo
+notebooks/              Colab notebook that trains everything on a free GPU
+results/                metric files and comparison tables
+docs/                   architecture diagrams and setup guide
+tests/                  offline unit tests
 ```
 
-## Setup
+## Quick start
 ```bash
 pip install -r requirements.txt
-python -m src.data_loading --task summarization --max-samples 2000   # quick smoke test
+python -m pytest tests -q                         # offline sanity check
+python -m src.data_loading --task qa --max-samples 200   # data loads?
+
+# Train (use Colab, GPU needed). One command per model:
+python -m src.summarization.train --model facebook/bart-base
+python -m src.summarization.train --model t5-small
+python -m src.qa.train --model distilbert-base-uncased
+python -m src.qa.train --model roberta-base
+python -m src.ner.train --model allenai/scibert_scivocab_uncased
+python -m src.ner.train --model bert-base-uncased
+python -m src.evaluation.compare                  # builds the comparison tables
+
+# Run the app
+uvicorn backend.main:app --port 8000              # open http://localhost:8000
 ```
 
+## Datasets
+| Task | Dataset | Notes |
+|------|---------|-------|
+| Summarization | ccdv/arxiv-summarization | scientific papers paired with their abstracts |
+| QA | SQuAD 2.0 | 130k+ questions, includes unanswerable ones |
+| NER | first available of the datasets in `configs/config.yaml` | the script prints which one it used |
+
 ## Status
-- [x] Repo scaffold, preprocessing, data loaders
-- [ ] Summarization fine-tuning (BART vs T5)
-- [ ] QA fine-tuning (DistilBERT vs RoBERTa)
-- [ ] NER fine-tuning (SciBERT vs BERT)
-- [ ] Evaluation and comparison tables
-- [ ] Demo app
+- [x] Repo, preprocessing, data loaders, training and evaluation scripts
+- [x] Pipeline, backend, frontend, Colab notebook
+- [ ] Summarization trained and evaluated (BART vs T5)
+- [ ] QA trained and evaluated (DistilBERT vs RoBERTa)
+- [ ] NER trained and evaluated (SciBERT vs BERT)
+- [ ] Comparison tables and diagrams
 - [ ] Report (IEEE format) and presentation

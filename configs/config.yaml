@@ -3,21 +3,31 @@
 
 seed: 42
 
+paths:
+  outputs_dir: "outputs"      # fine-tuned models are saved here (git-ignored)
+  results_dir: "results"      # metric JSON files and tables (commit these)
+
 summarization:
-  dataset: "ccdv/arxiv-summarization"   # long scientific papers + abstracts
-  train_samples: 20000                  # subsample so it fits free Colab GPUs
-  val_samples: 1000
-  test_samples: 1000
+  # Tried in order; first one that loads with `article` + `abstract` columns is used.
+  datasets:
+    - "ccdv/arxiv-summarization"        # long scientific papers + abstracts
+    - "ccdv/pubmed-summarization"       # same format, biomedical papers
+  train_samples: 10000                  # subsampled so it fits free Colab GPUs
+  val_samples: 500
+  test_samples: 500
   max_input_tokens: 1024
-  max_target_tokens: 256
+  max_target_tokens: 200
   models:
     - "facebook/bart-base"
     - "t5-small"
+  generation:
+    num_beams: 4
+    max_new_tokens: 200
 
 qa:
-  dataset: "squad_v2"                   # ~130k training questions
-  train_samples: 40000
-  val_samples: 3000
+  dataset: "rajpurkar/squad_v2"         # ~130k training questions, includes unanswerable ones
+  train_samples: 20000
+  val_samples: 1000
   max_seq_len: 384
   doc_stride: 128
   models:
@@ -27,12 +37,30 @@ qa:
   top_k_passages: 3
 
 ner:
-  dataset: "allenai/scierc"             # scientific entities (Task, Method, Metric, ...)
-  fallback_dataset: "conll2003"         # use this if SciERC is unavailable
+  # Tried in order; the first one that loads AND has token/tag columns is used.
+  # The script prints which one was chosen. Mention it in the report.
+  datasets:
+    - "DFKI-SLT/scierc"
+    - "surrey-nlp/PLOD-CW"
+    - "ncbi/ncbi_disease"
+    - "eriktks/conll2003"
   max_seq_len: 256
   models:
     - "allenai/scibert_scivocab_uncased"
     - "bert-base-uncased"
+
+serving:
+  # Which fine-tuned model the demo uses per task (pick the winner of your comparison).
+  summarization: "facebook/bart-base"
+  qa: "roberta-base"
+  ner: "allenai/scibert_scivocab_uncased"
+  # Until you have trained models, the demo can use public checkpoints so the
+  # UI works. These are NOT your fine-tuned models; set to false for the final demo.
+  allow_fallback: true
+  fallback:
+    summarization: "sshleifer/distilbart-cnn-12-6"
+    qa: "distilbert-base-cased-distilled-squad"
+    ner: "dslim/bert-base-NER"
 
 training:
   learning_rate: 5.0e-5
@@ -40,3 +68,11 @@ training:
   epochs: 3
   weight_decay: 0.01
   warmup_ratio: 0.06
+  # Per-task overrides used by the training scripts.
+  summarization_epochs: 3
+  qa_epochs: 2
+  ner_epochs: 5
+  qa_batch_size: 16
+  ner_batch_size: 16
+  summarization_batch_size: 4
+  summarization_grad_accum: 4
