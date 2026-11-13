@@ -1,14 +1,14 @@
 # ScholarLens: An NLP Assistant for Research Papers
 
 ## Team
+## Team
 | Name | Student ID | Module |
 |------|-----------|--------|
-| Member 1 | TODO | Data preprocessing + Summarization |
-| Member 2 | TODO | Semantic retrieval + Question Answering |
-| Member 3 | TODO | Named Entity Recognition + Evaluation |
-| Member 4 | TODO | Demo app + Architecture diagrams + Repo |
+| Sajitha Konda | 70082694 | Data preprocessing + Summarization (BART vs T5) + Architecture diagrams |
+| Mounika Sai Chowdary Chaparala| 700778259 | Semantic retrieval + Question Answering (DistilBERT vs RoBERTa) + Gradio demo app |
+| Babithji Repalle | TODO | Named Entity Recognition (SciBERT vs BERT) + Evaluation and comparison tables + Repo and README |
 
-Course: TODO | Instructor: TODO | Semester: TODO
+Course: CS5760 | Instructor: Tsai, Ihua | Semester: Fall 2026
 
 ## Introduction
 ScholarLens is a multi-task NLP pipeline that helps readers digest scientific papers.
